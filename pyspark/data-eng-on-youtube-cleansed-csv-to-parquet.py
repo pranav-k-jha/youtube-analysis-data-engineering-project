@@ -12,7 +12,8 @@ spark = glueContext.spark_session
 job = Job(glueContext)
 job.init(args['JOB_NAME'], args)
 
-predicate_pushdown = "region in ('ca','gb','us')"
+predicate_pushdown = "region = 'ca' OR region = 'gb' OR region = 'us'"
+
 
 # Script generated for node Amazon S3
 AmazonS3_node1721959861815 = glueContext.create_dynamic_frame.from_options(format_options={"quoteChar": "\"", "withHeader": True, "separator": ","}, connection_type="s3", format="csv", connection_options={"paths": ["s3://data-eng-on-youtube-raw-us-east-1-dev/youtube/raw_statistics/"], "recurse": True}, transformation_ctx="AmazonS3_node1721959861815", push_down_predicate = predicate_pushdown)
