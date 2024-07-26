@@ -19,6 +19,6 @@ AmazonS3_node1721959861815 = glueContext.create_dynamic_frame.from_options(forma
 
 
 # Script generated for node Amazon S3
-AmazonS3_node1721959904716 = glueContext.write_dynamic_frame.from_options(frame=AmazonS3_node1721959861815, connection_type="s3", format="glueparquet", connection_options={"path": "s3://data-eng-on-youtube-cleansed-us-east-1-dev/youtube/raw_statistics/", "partitionKeys": []}, format_options={"compression": "snappy"}, transformation_ctx="AmazonS3_node1721959904716")
+AmazonS3_node1721959904716 = glueContext.write_dynamic_frame.from_options(frame=AmazonS3_node1721959861815, connection_type="s3", format="glueparquet", connection_options={"path": "s3://data-eng-on-youtube-cleansed-us-east-1-dev/youtube/raw_statistics/", "partitionKeys": ["region"]}, format_options={"compression": "snappy"}, transformation_ctx="AmazonS3_node1721959904716")
 
 job.commit()
