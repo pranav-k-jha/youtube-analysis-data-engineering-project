@@ -5,6 +5,8 @@ from pyspark.context import SparkContext
 from awsglue.context import GlueContext
 from awsglue.job import Job
 
+from awsglue.dynamicframe import DynamicFrame
+
 args = getResolvedOptions(sys.argv, ['JOB_NAME'])
 sc = SparkContext()
 glueContext = GlueContext(sc)
@@ -12,37 +14,17 @@ spark = glueContext.spark_session
 job = Job(glueContext)
 job.init(args['JOB_NAME'], args)
 
-# Define paths
-input_path = "s3://data-eng-on-youtube-raw-us-east-1-dev/youtube/raw_statistics/"
-output_path = "s3://data-eng-on-youtube-cleansed-us-east-1-dev/youtube/raw_statistics/"
-bad_records_path = "s3://data-eng-on-youtube-bad-records/"
+predicate_pushdown = "region in ('ca','gb','us')"
 
-# Load the data from the S3 bucket with bad records handling
-amazon_s3_node = glueContext.create_dynamic_frame.from_options(
-    format_options={"quoteChar": "\"", "withHeader": True, "separator": ","},
-    connection_type="s3",
-    format="csv",
-    connection_options={"paths": [input_path], "recurse": True, "badRecordsPath": bad_records_path},
-    transformation_ctx="amazon_s3_node"
-)
+# Script generated for node Amazon S3
+AmazonS3_node1721964934698 = glueContext.create_dynamic_frame.from_options(format_options={"quoteChar": "\"", "withHeader": True, "separator": ","}, connection_type="s3", format="csv", connection_options={"paths": ["s3://data-eng-on-youtube-raw-us-east-1-dev/youtube/raw_statistics/"], "recurse": True}, transformation_ctx="AmazonS3_node1721964934698", push_down_predicate = predicate_pushdown)
 
-# Convert DynamicFrame to DataFrame
-dataframe = amazon_s3_node.toDF()
+dropnullfields3 = DropNullFields.apply(frame = AmazonS3_node1721964934698, transformation_ctx = "dropnullfields3")
 
-# Apply the filter to the DataFrame
-filtered_dataframe = dataframe.filter(dataframe["region"].isin("ca", "gb", "us"))
+datasink1 = dropnullfields3.toDF().coalesce(1)
+df_final_output = DynamicFrame.fromDF(datasink1, glueContext, "df_final_output")
 
-# Convert DataFrame back to DynamicFrame
-filtered_dynamic_frame = DynamicFrame.fromDF(filtered_dataframe, glueContext, "filtered_dynamic_frame")
-
-# Write the filtered data back to the S3 bucket
-glueContext.write_dynamic_frame.from_options(
-    frame=filtered_dynamic_frame,
-    connection_type="s3",
-    format="glueparquet",
-    connection_options={"path": output_path, "partitionKeys": ["region"]},
-    format_options={"compression": "snappy"},
-    transformation_ctx="filtered_dynamic_frame_node"
-)
+# Script generated for node Amazon S3
+AmazonS3_node1721965133914 = glueContext.write_dynamic_frame.from_options(frame=df_final_output, connection_type="s3", format="glueparquet", connection_options={"path": "s3://data-eng-on-youtube-cleansed-us-east-1-dev/youtube/raw_statistics/", "partitionKeys": ["region"]}, format_options={"compression": "snappy"}, transformation_ctx="AmazonS3_node1721965133914")
 
 job.commit()
