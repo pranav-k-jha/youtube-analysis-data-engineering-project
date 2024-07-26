@@ -12,12 +12,17 @@ spark = glueContext.spark_session
 job = Job(glueContext)
 job.init(args['JOB_NAME'], args)
 
-# Load the data from the S3 bucket
+# Define paths
+input_path = "s3://data-eng-on-youtube-raw-us-east-1-dev/youtube/raw_statistics/"
+output_path = "s3://data-eng-on-youtube-cleansed-us-east-1-dev/youtube/raw_statistics/"
+bad_records_path = "s3://data-eng-on-youtube-bad-records/"
+
+# Load the data from the S3 bucket with bad records handling
 amazon_s3_node = glueContext.create_dynamic_frame.from_options(
     format_options={"quoteChar": "\"", "withHeader": True, "separator": ","},
     connection_type="s3",
     format="csv",
-    connection_options={"paths": ["s3://data-eng-on-youtube-raw-us-east-1-dev/youtube/raw_statistics/"], "recurse": True},
+    connection_options={"paths": [input_path], "recurse": True, "badRecordsPath": bad_records_path},
     transformation_ctx="amazon_s3_node"
 )
 
@@ -35,7 +40,7 @@ glueContext.write_dynamic_frame.from_options(
     frame=filtered_dynamic_frame,
     connection_type="s3",
     format="glueparquet",
-    connection_options={"path": "s3://data-eng-on-youtube-cleansed-us-east-1-dev/youtube/raw_statistics/", "partitionKeys": ["region"]},
+    connection_options={"path": output_path, "partitionKeys": ["region"]},
     format_options={"compression": "snappy"},
     transformation_ctx="filtered_dynamic_frame_node"
 )
