@@ -24,3 +24,6 @@ This project uses a Kaggle dataset containing statistics (CSV files) on daily po
 
 [Kaggle YouTube New Dataset Link](https://www.kaggle.com/datasets/datasnaek/youtube-new)
 
+# Architecture Diagram
+
+<img src="architecture.jpeg"/>
